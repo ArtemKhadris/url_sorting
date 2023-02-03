@@ -9,39 +9,37 @@ import pymorphy2
 from pymorphy2 import tokenizers
 morph = pymorphy2.MorphAnalyzer()
 
-"""считываем бд, директорию поменять"""
-df = pd.read_csv('C:\\Users\\Lenovo\\Desktop\\fl\\1\\harvest_copy.csv')
-#df = df.head(10000)
-#df.to_csv('C:\\Users\\Lenovo\\Desktop\\fl\\1\\harvest_copy.csv')
+"""DB reading"""
+df = pd.read_csv('./harvest_copy.csv')
 
-###фильтруем бд от лишних строк
+###filtering the database from extra lines
 dff = df[df.link_type != 'link_type']
 
-###массив с типами урл
+###array with url types
 #lt = dff.link_type.unique()
 #print(lt)
 
-###самые частые слова в описании урл с категорией "контакт"
+###the most frequent words in the description of the url with the category "contact"
 def function_contact_ttl():
-    ###фильтруем для типа "контакт"
+    ###filter for type "contact"
     dff_contact = dff[dff.link_type == 'contact']
-    ###уникальные описания для категории "контакт"
+    ###unique descriptions for category "contact"
     ttl = dff_contact.title.unique()
     
-    ###разбиваем строки на слова
+    ###break lines into words
     ttl1 = []
     for i in range (len(ttl)-1):
         token_ttl = tokenizers.simple_word_tokenize(str(ttl[i]))
         ttl1.append(token_ttl)
 
-    ###фильтруем слова
-    ###перевод в нижний регистр
+    ###filter words
+    ###lowercase translation
     ttl2 = []
     for i in ttl1:
         for j in i:
             ttl2.append(j.lower())
 
-    ###удаление небуквенных символов и слов короче 5 символов
+    ###remove non-letter characters and words shorter than 5 characters
     ttl3=[]
     for i in ttl2:
         i = re.sub("</?.*?>"," <> ", i)
@@ -53,36 +51,36 @@ def function_contact_ttl():
         if len(i)>4:
             ttl3.append(i)
 
-    ###перевод слова в начальную форму
+    ###converting a word to its original form
     ttl4 = []
     for i in ttl3:
         ttl4.append(morph.parse(i)[0].normal_form)
 
-    ###создаем словарь, ключ - слово, значение - количество (установлено больше 10, можно изменить)
+    ###create a dictionary, key - word, value - quantity (set more than 0, can be changed)
     counter_ttl = {}
     for i in ttl4:
         counter_ttl[i] = counter_ttl.get(i, 0) + 1
     doubles_ttl = {element: count for element, count in counter_ttl.items() if count > 0}
     ttl = dict(sorted(doubles_ttl.items(), reverse = True, key=lambda x: x[1]))
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\contact_title.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./contact_title.txt','w',encoding='utf-8') as out:
         for key,val in ttl.items():
             out.write('{}:{}\n'.format(key,val))
 
     return 0
 
-###самые частые слова в урл с категорией "контакт"
+###the most frequent words in the url with the category "contact"
 def function_contact_url():
-    ###фильтруем для типа "контакт"
+    ###filter for type "contact"
     dff_contact = dff[dff.link_type == 'contact']
-    ###уникальные урл для категории "контакт"
+    ###unique urls for category "contact"
     url_name = dff_contact.url.unique()
-    ###черный список слов
+    ###black list of words
     url_bl = ['html', 'php', 'asp', 'aspx', 'xhtml', 'index']
     url_name1 = []
 
-    ###разбиваем строки на слова
+    ###break lines into words
     for i in url_name:
         tokens = re.split('\/|\%20|-|_| |\.', unquote(urlparse(i).path))
         filtered_tokens = list(
@@ -93,7 +91,7 @@ def function_contact_url():
         for j in list(set([_token.lower() for _token in filtered_tokens])):
             url_name1.append(j)
 
-    ###создаем словарь, ключ - слово, значение - количество
+    ###create a dictionary, key - word, value - quantity
     counter_url = {}
     for i in url_name1:
         counter_url[i] = counter_url.get(i, 0) + 1
@@ -101,8 +99,8 @@ def function_contact_url():
     url_name = dict(sorted(doubles_url.items(), reverse = True, key=lambda x: x[1]))
 
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\contact_url.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./contact_url.txt','w',encoding='utf-8') as out:
         for key,val in url_name.items():
             out.write('{}:{}\n'.format(key,val))
 
@@ -110,27 +108,27 @@ def function_contact_url():
 
 
 
-###самые частые слова в описании урл с категорией "реквизит"
+###the most frequent words in the description of the url with the category "payment details"
 def function_requisite_ttl():
-    ###фильтруем для типа "реквизит"
+    ###filter for type "payment details"
     dff_requisite = dff[dff.link_type == 'requisite']
-    ###уникальные описания для категории "реквизит"
+    ###unique descriptions for category "payment details"
     ttl = dff_requisite.title.unique()
     
-    ###разбиваем строки на слова
+    ###break lines into words
     ttl1 = []
     for i in range (len(ttl)-1):
         token_ttl = tokenizers.simple_word_tokenize(str(ttl[i]))
         ttl1.append(token_ttl)
 
-    ###фильтруем слова
-    ###перевод в нижний регистр
+    ###filter words
+    ###lowercase translation
     ttl2 = []
     for i in ttl1:
         for j in i:
             ttl2.append(j.lower())
 
-    ###удаление небуквенных символов и слов короче 5 символов
+    ###remove non-letter characters and words shorter than 5 characters
     ttl3=[]
     for i in ttl2:
         i = re.sub("</?.*?>"," <> ", i)
@@ -142,36 +140,36 @@ def function_requisite_ttl():
         if len(i)>4:
             ttl3.append(i)
 
-    ###перевод слова в начальную форму
+    ###converting a word to its original form
     ttl4 = []
     for i in ttl3:
         ttl4.append(morph.parse(i)[0].normal_form)
 
-    ###создаем словарь, ключ - слово, значение - количество (установлено больше 0, можно изменить)
+    ###create a dictionary, key - word, value - quantity (set more than 0, can be changed)
     counter_ttl = {}
     for i in ttl4:
         counter_ttl[i] = counter_ttl.get(i, 0) + 1
     doubles_ttl = {element: count for element, count in counter_ttl.items() if count > 0}
     ttl = dict(sorted(doubles_ttl.items(), reverse = True, key=lambda x: x[1]))
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\requisite_title.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./requisite_title.txt','w',encoding='utf-8') as out:
         for key,val in ttl.items():
             out.write('{}:{}\n'.format(key,val))
 
     return 0
 
-###самые частые слова в урл с категорией "реквизит"
+###most frequent words in url with category "payment details"
 def function_requisite_url():
-    ###фильтруем для типа "реквизит"
+    ###filter for type "payment details"
     dff_requisite = dff[dff.link_type == 'requisite']
-    ###уникальные урл для категории "реквизит"
+    ###unique urls for the category "payment details"
     url_name = dff_requisite.url.unique()
-    ###черный список слов
+    ###black list of words
     url_bl = ['html', 'php', 'asp', 'aspx', 'xhtml', 'index']
     url_name1 = []
 
-    ###разбиваем строки на слова
+    ###break lines into words
     for i in url_name:
         tokens = re.split('\/|\%20|-|_| |\.', unquote(urlparse(i).path))
         filtered_tokens = list(
@@ -182,7 +180,7 @@ def function_requisite_url():
         for j in list(set([_token.lower() for _token in filtered_tokens])):
             url_name1.append(j)
 
-    ###создаем словарь, ключ - слово, значение - количество (установлено больше 0, можно изменить)
+    ###create a dictionary, key - word, value - quantity (set more than 0, can be changed)
     counter_url = {}
     for i in url_name1:
         counter_url[i] = counter_url.get(i, 0) + 1
@@ -190,8 +188,8 @@ def function_requisite_url():
     url_name = dict(sorted(doubles_url.items(), reverse = True, key=lambda x: x[1]))
 
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\requisite_url.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./requisite_url.txt','w',encoding='utf-8') as out:
         for key,val in url_name.items():
             out.write('{}:{}\n'.format(key,val))
 
@@ -199,27 +197,27 @@ def function_requisite_url():
 
 
 
-###самые частые слова в описании урл с категорией "about"
+###the most frequent words in the url description with the "about" category
 def function_about_ttl():
-    ###фильтруем для типа "about"
+    ###filtering for type "about"
     dff_about = dff[dff.link_type == 'about']
-    ###уникальные описания для категории "about"
+    ###unique descriptions for category "about"
     ttl = dff_about.title.unique()
     
-    ###разбиваем строки на слова
+    ###break lines into words
     ttl1 = []
     for i in range (len(ttl)-1):
         token_ttl = tokenizers.simple_word_tokenize(str(ttl[i]))
         ttl1.append(token_ttl)
 
-    ###фильтруем слова
-    ###перевод в нижний регистр
+    ###filter words
+    ###lowercase translation
     ttl2 = []
     for i in ttl1:
         for j in i:
             ttl2.append(j.lower())
 
-    ###удаление небуквенных символов и слов короче 5 символов
+    ###remove non-letter characters and words shorter than 5 characters
     ttl3=[]
     for i in ttl2:
         i = re.sub("</?.*?>"," <> ", i)
@@ -231,36 +229,36 @@ def function_about_ttl():
         if len(i)>4:
             ttl3.append(i)
 
-    ###перевод слова в начальную форму
+    ###converting a word to its original form
     ttl4 = []
     for i in ttl3:
         ttl4.append(morph.parse(i)[0].normal_form)
 
-    ###создаем словарь, ключ - слово, значение - количество (установлено больше 0, можно изменить)
+    ###create a dictionary, key - word, value - quantity (set more than 0, can be changed)
     counter_ttl = {}
     for i in ttl4:
         counter_ttl[i] = counter_ttl.get(i, 0) + 1
     doubles_ttl = {element: count for element, count in counter_ttl.items() if count > 0}
     ttl = dict(sorted(doubles_ttl.items(), reverse = True, key=lambda x: x[1]))
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\about_title.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./about_title.txt','w',encoding='utf-8') as out:
         for key,val in ttl.items():
                 out.write('{}:{}\n'.format(key,val))
 
     return 0
 
-###самые частые слова в урл с категорией "about"
+###the most frequent words in the url with the category "about"
 def function_about_url():
-    ###фильтруем для типа "about"
+    ###filtering for type "about"
     dff_about = dff[dff.link_type == 'about']
-    ###уникальные урл для категории "about"
+    ###unique urls for category "about"
     url_name = dff_about.url.unique()
-    ###черный список слов
+    ###black list of words
     url_bl = ['html', 'php', 'asp', 'aspx', 'xhtml', 'index']
     url_name1 = []
 
-    ###разбиваем строки на слова
+    ###break lines into words
     for i in url_name:
         tokens = re.split('\/|\%20|-|_| |\.', unquote(urlparse(i).path))
         filtered_tokens = list(
@@ -271,7 +269,7 @@ def function_about_url():
         for j in list(set([_token.lower() for _token in filtered_tokens])):
             url_name1.append(j)
 
-    ###создаем словарь, ключ - слово, значение - количество (установлено больше 0, можно изменить)
+    ###create a dictionary, key - word, value - quantity (set more than 0, can be changed)
     counter_url = {}
     for i in url_name1:
         counter_url[i] = counter_url.get(i, 0) + 1
@@ -279,8 +277,8 @@ def function_about_url():
     url_name = dict(sorted(doubles_url.items(), reverse = True, key=lambda x: x[1]))
 
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\about_url.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./about_url.txt','w',encoding='utf-8') as out:
         for key,val in url_name.items():
             out.write('{}:{}\n'.format(key,val))
 
@@ -288,27 +286,27 @@ def function_about_url():
 
 
 
-###самые частые слова в описании урл с категорией "оплата"
+###the most frequent words in the description of the url with the category "payment"
 def function_payment_ttl():
-    ###фильтруем для типа "оплата"
+    ###filter for payment type
     dff_payment = dff[dff.link_type == 'payment']
-    ###уникальные описания для категории "оплата"
+    ###unique descriptions for the "payment" category
     ttl = dff_payment.title.unique()
     
-    ###разбиваем строки на слова
+    ###break lines into words
     ttl1 = []
     for i in range (len(ttl)-1):
         token_ttl = tokenizers.simple_word_tokenize(str(ttl[i]))
         ttl1.append(token_ttl)
 
-    ###фильтруем слова
-    ###перевод в нижний регистр
+    ###filter words
+    ###lowercase translation
     ttl2 = []
     for i in ttl1:
         for j in i:
             ttl2.append(j.lower())
 
-    ###удаление небуквенных символов и слов короче 5 символов
+    ###remove non-letter characters and words shorter than 5 characters
     ttl3=[]
     for i in ttl2:
         i = re.sub("</?.*?>"," <> ", i)
@@ -320,36 +318,36 @@ def function_payment_ttl():
         if len(i)>4:
             ttl3.append(i)
 
-    ###перевод слова в начальную форму
+    ###converting a word to its original form
     ttl4 = []
     for i in ttl3:
         ttl4.append(morph.parse(i)[0].normal_form)
 
-    ###создаем словарь, ключ - слово, значение - количество (установлено больше 0, можно изменить)
+    ###create a dictionary, key - word, value - quantity (set more than 0, can be changed)
     counter_ttl = {}
     for i in ttl4:
         counter_ttl[i] = counter_ttl.get(i, 0) + 1
     doubles_ttl = {element: count for element, count in counter_ttl.items() if count > 0}
     ttl = dict(sorted(doubles_ttl.items(), reverse = True, key=lambda x: x[1]))
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\payment_title.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./payment_title.txt','w',encoding='utf-8') as out:
         for key,val in ttl.items():
             out.write('{}:{}\n'.format(key,val))
 
     return 0
 
-###самые частые слова в урл с категорией "оплата"
+###the most frequent words in the URL with the category "payment"
 def function_payment_url():
-    ###фильтруем для типа "оплата"
+    ###filter for payment type
     dff_payment = dff[dff.link_type == 'payment']
-    ###уникальные урл для категории "оплата"
+    ###unique urls for category "payment"
     url_name = dff_payment.url.unique()
-    ###черный список слов
+    ###black list of words
     url_bl = ['html', 'php', 'asp', 'aspx', 'xhtml', 'index']
     url_name1 = []
 
-    ###разбиваем строки на слова
+    ###break lines into words
     for i in url_name:
         tokens = re.split('\/|\%20|-|_| |\.', unquote(urlparse(i).path))
         filtered_tokens = list(
@@ -360,7 +358,7 @@ def function_payment_url():
         for j in list(set([_token.lower() for _token in filtered_tokens])):
             url_name1.append(j)
 
-    ###создаем словарь, ключ - слово, значение - количество (установлено больше 0, можно изменить)
+    ###create a dictionary, key - word, value - quantity (set more than 0, can be changed)
     counter_url = {}
     for i in url_name1:
         counter_url[i] = counter_url.get(i, 0) + 1
@@ -368,8 +366,8 @@ def function_payment_url():
     url_name = dict(sorted(doubles_url.items(), reverse = True, key=lambda x: x[1]))
 
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\payment_url.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./payment_url.txt','w',encoding='utf-8') as out:
         for key,val in url_name.items():
             out.write('{}:{}\n'.format(key,val))
 
@@ -377,27 +375,27 @@ def function_payment_url():
 
 
 
-###самые частые слова в описании урл с категорией "доставка"
+###the most frequent words in the description of the url with the category "delivery"
 def function_delivery_ttl():
-    ###фильтруем для типа "доставка"
+    ###filtering for the type "delivery"
     dff_delivery = dff[dff.link_type == 'delivery']
-    ###уникальные описания для категории "доставка"
+    ###unique descriptions for the "delivery" category
     ttl = dff_delivery.title.unique()
     
-    ###разбиваем строки на слова
+    ###break lines into words
     ttl1 = []
     for i in range (len(ttl)-1):
         token_ttl = tokenizers.simple_word_tokenize(str(ttl[i]))
         ttl1.append(token_ttl)
 
-    ###фильтруем слова
-    ###перевод в нижний регистр
+    ###filter words
+    ###lowercase translation
     ttl2 = []
     for i in ttl1:
         for j in i:
             ttl2.append(j.lower())
 
-    ###удаление небуквенных символов и слов короче 5 символов
+    ###remove non-letter characters and words shorter than 5 characters
     ttl3=[]
     for i in ttl2:
         i = re.sub("</?.*?>"," <> ", i)
@@ -409,36 +407,36 @@ def function_delivery_ttl():
         if len(i)>4:
             ttl3.append(i)
 
-    ###перевод слова в начальную форму
+    ###converting a word to its original form
     ttl4 = []
     for i in ttl3:
         ttl4.append(morph.parse(i)[0].normal_form)
 
-    ###создаем словарь, ключ - слово, значение - количество (установлено больше 0, можно изменить)
+    ###create a dictionary, key - word, value - quantity (set more than 0, can be changed)
     counter_ttl = {}
     for i in ttl4:
         counter_ttl[i] = counter_ttl.get(i, 0) + 1
     doubles_ttl = {element: count for element, count in counter_ttl.items() if count > 0}
     ttl = dict(sorted(doubles_ttl.items(), reverse = True, key=lambda x: x[1]))
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\delivery_title.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./delivery_title.txt','w',encoding='utf-8') as out:
         for key,val in ttl.items():
             out.write('{}:{}\n'.format(key,val))
 
     return 0
 
-###самые частые слова в урл с категорией "доставка"
+###the most frequent words in the url with the category "delivery"
 def function_delivery_url():
-    ###фильтруем для типа "доставка"
+    ###filtering for the type "delivery"
     dff_delivery = dff[dff.link_type == 'delivery']
-    ###уникальные урл для категории "доставка"
+    ###unique urls for category "delivery"
     url_name = dff_delivery.url.unique()
-    ###черный список слов
+    ###black list of words
     url_bl = ['html', 'php', 'asp', 'aspx', 'xhtml', 'index']
     url_name1 = []
 
-    ###разбиваем строки на слова
+    ###break lines into words
     for i in url_name:
         tokens = re.split('\/|\%20|-|_| |\.', unquote(urlparse(i).path))
         filtered_tokens = list(
@@ -449,7 +447,7 @@ def function_delivery_url():
         for j in list(set([_token.lower() for _token in filtered_tokens])):
             url_name1.append(j)
 
-    ###создаем словарь, ключ - слово, значение - количество (установлено больше 0, можно изменить)
+    ###create a dictionary, key - word, value - quantity (set more than 0, can be changed)
     counter_url = {}
     for i in url_name1:
         counter_url[i] = counter_url.get(i, 0) + 1
@@ -457,8 +455,8 @@ def function_delivery_url():
     url_name = dict(sorted(doubles_url.items(), reverse = True, key=lambda x: x[1]))
 
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\delivery_url.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./delivery_url.txt','w',encoding='utf-8') as out:
         for key,val in url_name.items():
             out.write('{}:{}\n'.format(key,val))
 
@@ -466,27 +464,27 @@ def function_delivery_url():
 
 
 
-###самые частые слова в описании урл с категорией "другое"
+###the most frequent words in the description of the url with the category "other"
 def function_other_ttl():
-    ###фильтруем для типа "другое"
+    ###filtering for type "other"
     dff_other = dff[dff.link_type == 'other']
-    ###уникальные описания для категории "другое"
+    ###unique descriptions for category "other"
     ttl = dff_other.title.unique()
     
-    ###разбиваем строки на слова
+    ###break lines into words
     ttl1 = []
     for i in range (len(ttl)-1):
         token_ttl = tokenizers.simple_word_tokenize(str(ttl[i]))
         ttl1.append(token_ttl)
 
-    ###фильтруем слова
-    ###перевод в нижний регистр
+    ###filter words
+    ###lowercase translation
     ttl2 = []
     for i in ttl1:
         for j in i:
             ttl2.append(j.lower())
 
-    ###удаление небуквенных символов и слов короче 5 символов
+    ###remove non-letter characters and words shorter than 5 characters
     ttl3=[]
     for i in ttl2:
         i = re.sub("</?.*?>"," <> ", i)
@@ -498,36 +496,36 @@ def function_other_ttl():
         if len(i)>4:
             ttl3.append(i)
 
-    ###перевод слова в начальную форму
+    ###converting a word to its original form
     ttl4 = []
     for i in ttl3:
         ttl4.append(morph.parse(i)[0].normal_form)
 
-    ###создаем словарь, ключ - слово, значение - количество (установлено больше 0, можно изменить)
+    ###create a dictionary, key - word, value - quantity (set more than 0, can be changed)
     counter_ttl = {}
     for i in ttl4:
         counter_ttl[i] = counter_ttl.get(i, 0) + 1
     doubles_ttl = {element: count for element, count in counter_ttl.items() if count > 0}
     ttl = dict(sorted(doubles_ttl.items(), reverse = True, key=lambda x: x[1]))
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\other_title.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./other_title.txt','w',encoding='utf-8') as out:
         for key,val in ttl.items():
             out.write('{}:{}\n'.format(key,val))
 
     return 0
 
-###самые частые слова в урл с категорией "другое"
+###the most frequent words in the url with the category "other"
 def function_other_url():
-    ###фильтруем для типа "другое"
+    ###filtering for type "other"
     dff_other = dff[dff.link_type == 'other']
-    ###уникальные урл для категории "другое"
+    ###unique urls for category "other"
     url_name = dff_other.url.unique()
-    ###черный список слов
+    ###black list of words
     url_bl = ['html', 'php', 'asp', 'aspx', 'xhtml', 'index']
     url_name1 = []
 
-    ###разбиваем строки на слова
+    ###break lines into words
     for i in url_name:
         tokens = re.split('\/|\%20|-|_| |\.', unquote(urlparse(i).path))
         filtered_tokens = list(
@@ -538,7 +536,7 @@ def function_other_url():
         for j in list(set([_token.lower() for _token in filtered_tokens])):
             url_name1.append(j)
 
-    ###создаем словарь, ключ - слово, значение - количество (установлено больше 0, можно изменить)
+    ###create a dictionary, key - word, value - quantity (set more than 0, can be changed)
     counter_url = {}
     for i in url_name1:
         counter_url[i] = counter_url.get(i, 0) + 1
@@ -546,8 +544,8 @@ def function_other_url():
     url_name = dict(sorted(doubles_url.items(), reverse = True, key=lambda x: x[1]))
 
 
-    """запись в файл, директорию поменять"""
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\other_url.txt','w',encoding='utf-8') as out:
+    """write to file"""
+    with open('./other_url.txt','w',encoding='utf-8') as out:
         for key,val in url_name.items():
             out.write('{}:{}\n'.format(key,val))
 
@@ -555,19 +553,19 @@ def function_other_url():
 
 
 
-###повторная сортировка сайтов с категорией "другое"
+###re-sorting of sites with the category "other"
 def function_second_sort_other():
-    ###создаем пустой файл для записи строк
-    with open('C:\\Users\\Lenovo\\Desktop\\fl\\1\\outfile1.csv', 'w'):
+    ###create an empty file for writing lines
+    with open('./outfile1.csv', 'w'):
         pass
 
-    ###фильтруем для типа "другое"
+    ###filtering for type "other"
     dff_other = dff[dff.link_type == 'other']
 
-    ###черный список слов
+    ###black list of words
     url_bl = ['html', 'php', 'asp', 'aspx', 'xhtml', 'index']
 
-    ###ключевые слова и черные списки слов для всех категорий
+    ###keywords and word blacklists for all categories
     url_cont_ab_req = ['contacts', 'kontakty', 'contact', 'kontakti', 'kontaktnye', 'kontaktyi', 'kontakt', 
         'feedback', 'контакты', 'kontaktnaya', 'kontaktnoy', 'kontaktnoj', 'kontaktov', 'requisites', 
         'rekvizity', 'rekviziti', 'rekvizit', 'rekvizityi', 'requisite', 'реквизиты', 'bank', 'bankovskie', 
@@ -622,10 +620,7 @@ def function_second_sort_other():
     ttl_cart_bl = ['банк', 'банковская', 'мультик', 'мультфильм', 'мультсериал', 'мульт']
     
 
-    #!!! Объединяем все группы урлов в один словарь
-    #!!! словари наше всё, главное понять как и что завернуть (что сделаеть ключом, а что - значением)
-    #!!! на пандас может быть тоже можно такое провернуть, но я просто больше работаю с голым пайтоном
-    ###отдельные группы для урл, описания и черных списков для урл и описания
+    ### Combine all groups of urls into one dictionary
     url_groups = {
         'contact, requisite, about': url_cont_ab_req,
         'payment, delivery': url_del_pay,
@@ -661,25 +656,25 @@ def function_second_sort_other():
     }
     
 
-    ###разбиваем строки на слова
+    ###break lines into words
     dff_other = dff_other.reindex(dff_other.columns.to_list() + ['link_type2'], axis=1)
     print(len(dff_other))
     quant_str = 1
-    ###таймер для 1000 строк
+    ###timer for 1000 lines
     count = 0
     start = int(time.time())
     dff_other1 = dff_other.head(0)
-    dff_other1.to_csv('C:\\Users\\Lenovo\\Desktop\\fl\\1\\outfile1.csv', mode = 'a', index = False)
+    dff_other1.to_csv('./outfile1.csv', mode = 'a', index = False)
     for strings in range (1, len(dff_other), quant_str):
         count += 1
         if count % 1000 == 0:
                 now = int(time.time())
                 print(count, now - start)
                 start = int(time.time())
-        ###саздаем дф с одной строкой, тк построчно работает быстрее
+        ###create df with one line, because line by line works faster
         dff_other_cycle = pd.concat([dff_other.head(0), dff_other[strings:strings+quant_str]], ignore_index = True)
         
-        ###счетчик слов в урл и описании, для каждой строки создается новый
+        ###word counter in url and description, a new one is created for each line
         categories_counter = {
                 'contact, requisite, about': 0, 
                 'payment, delivery': 0, 
@@ -689,7 +684,7 @@ def function_second_sort_other():
                 'cart': 0
             }
         
-        ###разбиваем урл на слова
+        ###split url into words
         for adress in dff_other_cycle.url:
             tokens = re.split('\/|\%20|-|_| |\.', unquote(urlparse(adress).path))
             filtered_tokens = list(
@@ -698,8 +693,7 @@ def function_second_sort_other():
                 )
             )
         
-        ###разбиваем описание на слова, приводим к нижнему регистру и в начальную форму,
-        ###удаляем все лишние символы
+        ###we break the description into words, reduce it to lowercase and into the initial form, remove all unnecessary characters
         ttl1=[]
         for a in dff_other_cycle.title:
             token_ttl = tokenizers.simple_word_tokenize(str(a))
@@ -722,49 +716,38 @@ def function_second_sort_other():
         for a in ttl3:
             ttl4.append(morph.parse(a)[0].normal_form)
 
-        #!!! Объявляем словарь с счетчиками. Так код будет лакончинее, а подсчеты такие же простые
-        #!!! для простоты ключи называем также как и в словаре с группами урлов выше
+        ###Declaring a dictionary with counters
         
         for j in list(set([_token.lower() for _token in filtered_tokens])):
-            #!!! Вместо кучи ветвлений делаем сложную конструкцию из одного цикла
-            #!!! это тоже получается довольно долго за счет вложенного цикла, но зато код понятнее
-            #!!! и ещё совет по поводу j и других названий переменных. 
-            #!!! лучше называть более явно переменные, чтобы сохранялся контекст и читаемость, как в цикле ниже
-            #!!! итерируем по ключу (названию группы) и значения (список с паттернами урлов) словаря 
             for _url_group_name, _url_group_list in url_groups.items():
-                #!!! проверяем, что паттерн, который мы проверяем, находится в списке паттернов
                 if j in _url_group_list:
-                    #!!! и если так, то инкрементируем счетчик в словаре счетчика
                     categories_counter[_url_group_name] += 1
 
-        ###аналогично предыдущему, но для черного списка
-        ###тк это чс, то счетчик в минус на более весомое значение
-        ###чтобы включение этого слова точно показывало, что урл к категории не имеет отношения
+        ###similar to the previous one, but for the blacklist
+        ###since this is a blacklist, then the counter is minus by a more significant value
+        ###so that the inclusion of this word clearly shows that the url is not related to the category
         for j in list(set([_token.lower() for _token in filtered_tokens])):
             for _url_group_name_bl, _url_group_list_bl in url_groups_bl.items():
                 if j in _url_group_list_bl:
                     categories_counter[_url_group_name_bl] -= 5
         
-        ###аналогично предыдущему
+        ###similar to the previous one
         for j in ttl4:
             for _title_group_name, _title_group_list in title_groups.items():
                 if j in _title_group_list:
                     categories_counter[_title_group_name] += 1
         
-        ###аналогично предыдущему, но для черного списка
+        ###similar to the previous one
         for j in ttl4:
             for _title_group_name_bl, _title_group_list_bl in title_groups_bl.items():
                 if j in _title_group_list_bl:
                     categories_counter[_title_group_name_bl] -= 5
 
-        #!!! после этого нам необходимо только найти максимальное значение из словаря со счетчиками
-        #!!! делается это всё в одну строчку
-        #!!! тут лучше почитать официальну доку  - https://docs.python.org/3/library/functions.html#max
-        #!!! в переменной max_category_name будет храниться название категории (url_contact, url_news) с максимальным счетчиком 
+        ###the variable max_category_name will store the name of the category (url_contact, url_news) with the maximum counter
         max_category_name = max(categories_counter, key=categories_counter.get)
-        ###этот список необходим для оценки ошибочного присвоения (2-3 категории с одинаковым счетчиком)
+        ###this list is needed to evaluate misassignment (2-3 categories with the same counter)
         sorted_categories_counter = list(sorted(categories_counter.items(), key = lambda item: item[1], reverse = True))
-        ###присвоение категории
+        ###category assignment
         if sorted_categories_counter[0][1] == sorted_categories_counter[1][1] == sorted_categories_counter[2][1] != 0:
             dff_other_cycle.loc[dff_other_cycle['url'] == adress, 'link_type2'] = '3 categorys'
         elif sorted_categories_counter[0][1] == sorted_categories_counter[1][1] != 0:
@@ -774,14 +757,14 @@ def function_second_sort_other():
         else:
             dff_other_cycle.loc[dff_other_cycle['url'] == adress, 'link_type2'] = 'other'
         
-        ###запись в файл построчно
-        dff_other_cycle.to_csv('C:\\Users\\Lenovo\\Desktop\\fl\\1\\outfile1.csv', mode = 'a', index = False, header = False)
+        ###write to file line by line
+        dff_other_cycle.to_csv('./outfile1.csv', mode = 'a', index = False, header = False)
     
     return 0
     
-###оценка результатов работы функции повторной сортировки
+###evaluating the results of the resort function
 def res_ev():
-    df = pd.read_csv('C:\\Users\\Lenovo\\Desktop\\fl\\1\\outfile1.csv')
+    df = pd.read_csv('./outfile1.csv')
     print("контакт/реквизиты/эбаут  ", len(df[df.link_type2 == 'contact, requisite, about']))
     print("доставка/оплата  ", len(df[df.link_type2 == 'payment, delivery']))
     print("новости  ", len(df[df.link_type2 == 'news']))
